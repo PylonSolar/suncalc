@@ -1,6 +1,5 @@
-
-var SunCalc = require('./suncalc'),
-    t = require('tap');
+import * as SunCalc from "./suncalc.js";
+import { assert, assertEquals } from "https://deno.land/std@0.61.0/testing/asserts.ts";
 
 function near(val1, val2, margin) {
     return Math.abs(val1 - val2) < (margin || 1E-15);
@@ -35,55 +34,49 @@ var heightTestTimes = {
     sunset: '2013-03-05T15:56:46Z'
 };
 
-t.test('getPosition returns azimuth and altitude for the given time and location', function (t) {
+Deno.test('getPosition returns azimuth and altitude for the given time and location', function() {
     var sunPos = SunCalc.getPosition(date, lat, lng);
 
-    t.ok(near(sunPos.azimuth, -2.5003175907168385), 'azimuth');
-    t.ok(near(sunPos.altitude, -0.7000406838781611), 'altitude');
-    t.end();
+    assert(near(sunPos.azimuth, -2.5003175907168385), 'azimuth');
+    assert(near(sunPos.altitude, -0.7000406838781611), 'altitude');
 });
 
-t.test('getTimes returns sun phases for the given date and location', function (t) {
+Deno.test('getTimes returns sun phases for the given date and location', function() {
     var times = SunCalc.getTimes(date, lat, lng);
 
     for (var i in testTimes) {
-        t.equal(new Date(testTimes[i]).toUTCString(), times[i].toUTCString(), i);
+        assertEquals(new Date(testTimes[i]).toUTCString(), times[i].toUTCString(), i);
     }
-    t.end();
 });
 
-t.test('getTimes adjusts sun phases when additionally given the observer height', function (t) {
+Deno.test('getTimes adjusts sun phases when additionally given the observer height', function() {
     var times = SunCalc.getTimes(date, lat, lng, height);
 
     for (var i in heightTestTimes) {
-        t.equal(new Date(heightTestTimes[i]).toUTCString(), times[i].toUTCString(), i);
+        assertEquals(new Date(heightTestTimes[i]).toUTCString(), times[i].toUTCString(), i);
     }
-    t.end();
 });
 
-t.test('getMoonPosition returns moon position data given time and location', function (t) {
+Deno.test('getMoonPosition returns moon position data given time and location', function() {
     var moonPos = SunCalc.getMoonPosition(date, lat, lng);
 
-    t.ok(near(moonPos.azimuth, -0.9783999522438226), 'azimuth');
-    t.ok(near(moonPos.altitude, 0.014551482243892251), 'altitude');
-    t.ok(near(moonPos.distance, 364121.37256256194), 'distance');
-    t.end();
+    assert(near(moonPos.azimuth, -0.9783999522438226), 'azimuth');
+    assert(near(moonPos.altitude, 0.014551482243892251), 'altitude');
+    assert(near(moonPos.distance, 364121.37256256194), 'distance');
 });
 
-t.test('getMoonIllumination returns fraction and angle of moon\'s illuminated limb and phase', function (t) {
+Deno.test('getMoonIllumination returns fraction and angle of moon\'s illuminated limb and phase', function() {
     var moonIllum = SunCalc.getMoonIllumination(date);
 
-    t.ok(near(moonIllum.fraction, 0.4848068202456373), 'fraction');
-    t.ok(near(moonIllum.phase, 0.7548368838538762), 'phase');
-    t.ok(near(moonIllum.angle, 1.6732942678578346), 'angle');
-    t.end();
+    assert(near(moonIllum.fraction, 0.4848068202456373), 'fraction');
+    assert(near(moonIllum.phase, 0.7548368838538762), 'phase');
+    assert(near(moonIllum.angle, 1.6732942678578346), 'angle');
 });
 
-t.test('getMoonTimes returns moon rise and set times', function (t) {
+Deno.test('getMoonTimes returns moon rise and set times', function() {
     var moonTimes = SunCalc.getMoonTimes(new Date('2013-03-04UTC'), lat, lng, true);
 
-    t.equal(moonTimes.rise.toUTCString(), 'Mon, 04 Mar 2013 23:54:29 GMT');
-    t.equal(moonTimes.set.toUTCString(), 'Mon, 04 Mar 2013 07:47:58 GMT');
+    assertEquals(moonTimes.rise.toUTCString(), 'Mon, 04 Mar 2013 23:54:29 GMT');
+    assertEquals(moonTimes.set.toUTCString(), 'Mon, 04 Mar 2013 07:47:58 GMT');
 
-    t.end();
 });
