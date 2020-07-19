@@ -4,8 +4,6 @@
  https://github.com/mourner/suncalc
 */
 
-(function () { 'use strict';
-
 // shortcuts for easier to read formulas
 
 var PI   = Math.PI,
@@ -75,13 +73,9 @@ function sunCoords(d) {
     };
 }
 
-
-var SunCalc = {};
-
-
 // calculates sun position for a given date and latitude/longitude
 
-SunCalc.getPosition = function (date, lat, lng) {
+export function getPosition(date, lat, lng) {
 
     var lw  = rad * -lng,
         phi = rad * lat,
@@ -99,7 +93,7 @@ SunCalc.getPosition = function (date, lat, lng) {
 
 // sun times configuration (angle, morning name, evening name)
 
-var times = SunCalc.times = [
+export var times = [
     [-0.833, 'sunrise',       'sunset'      ],
     [  -0.3, 'sunriseEnd',    'sunsetStart' ],
     [    -6, 'dawn',          'dusk'        ],
@@ -110,7 +104,7 @@ var times = SunCalc.times = [
 
 // adds a custom time to the times config
 
-SunCalc.addTime = function (angle, riseName, setName) {
+export function addTime(angle, riseName, setName) {
     times.push([angle, riseName, setName]);
 };
 
@@ -139,7 +133,7 @@ function getSetJ(h, lw, phi, dec, n, M, L) {
 // calculates sun times for a given date, latitude/longitude, and, optionally,
 // the observer height (in meters) relative to the horizon
 
-SunCalc.getTimes = function (date, lat, lng, height) {
+export function getTimes(date, lat, lng, height) {
 
     height = height || 0;
 
@@ -200,7 +194,7 @@ function moonCoords(d) { // geocentric ecliptic coordinates of the moon
     };
 }
 
-SunCalc.getMoonPosition = function (date, lat, lng) {
+export function getMoonPosition(date, lat, lng) {
 
     var lw  = rad * -lng,
         phi = rad * lat,
@@ -227,7 +221,7 @@ SunCalc.getMoonPosition = function (date, lat, lng) {
 // based on http://idlastro.gsfc.nasa.gov/ftp/pro/astro/mphase.pro formulas and
 // Chapter 48 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
 
-SunCalc.getMoonIllumination = function (date) {
+export function getMoonIllumination(date) {
 
     var d = toDays(date || new Date()),
         s = sunCoords(d),
@@ -254,19 +248,19 @@ function hoursLater(date, h) {
 
 // calculations for moon rise/set times are based on http://www.stargazing.net/kepler/moonrise.html article
 
-SunCalc.getMoonTimes = function (date, lat, lng, inUTC) {
+export function getMoonTimes(date, lat, lng, inUTC) {
     var t = new Date(date);
     if (inUTC) t.setUTCHours(0, 0, 0, 0);
     else t.setHours(0, 0, 0, 0);
 
     var hc = 0.133 * rad,
-        h0 = SunCalc.getMoonPosition(t, lat, lng).altitude - hc,
+        h0 = getMoonPosition(t, lat, lng).altitude - hc,
         h1, h2, rise, set, a, b, xe, ye, d, roots, x1, x2, dx;
 
     // go in 2-hour chunks, each time seeing if a 3-point quadratic curve crosses zero (which means rise or set)
     for (var i = 1; i <= 24; i += 2) {
-        h1 = SunCalc.getMoonPosition(hoursLater(t, i), lat, lng).altitude - hc;
-        h2 = SunCalc.getMoonPosition(hoursLater(t, i + 1), lat, lng).altitude - hc;
+        h1 = getMoonPosition(hoursLater(t, i), lat, lng).altitude - hc;
+        h2 = getMoonPosition(hoursLater(t, i + 1), lat, lng).altitude - hc;
 
         a = (h0 + h2) / 2 - h1;
         b = (h2 - h0) / 2;
@@ -307,11 +301,3 @@ SunCalc.getMoonTimes = function (date, lat, lng, inUTC) {
 
     return result;
 };
-
-
-// export as Node module / AMD module / browser variable
-if (typeof exports === 'object' && typeof module !== 'undefined') module.exports = SunCalc;
-else if (typeof define === 'function' && define.amd) define(SunCalc);
-else window.SunCalc = SunCalc;
-
-}());
